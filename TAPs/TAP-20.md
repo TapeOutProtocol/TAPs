@@ -35,10 +35,12 @@ Goal: extend TapeOut into a base network that can **issue and transfer digital a
 
 ## Motivation
 
-- Path A (container-bound ERC-20) optimises DEX/wallets; it does not create a **metaprotocol** state machine shared by all indexers.
-- Ecosystem narratives and “native asset issuance” benefit from a **single replay rule** over TapeOut writes.
-- SiteRegistry + events give content-addressed, hash-verified payloads (closer to inscriptions than bare `eth_call` storage of third-party ERC-20s).
-- Circuit identity gives a clearer **issuer** than a bare EOA deploy on Ethereum.
+A TapeOut processor can produce circuits; each circuit can have its own container. This is a foundation for a network of independently identifiable applications, but it does not yet give those applications a shared way to issue and exchange fungible value. Today, a project that wants a token must normally deploy an ERC-20 contract elsewhere in the same EVM environment. The container may own that contract or host its website, but the ERC-20 contract remains the source of balances and transaction rules. Other TapeOut applications cannot infer a common asset identity or settlement interface from the circuit alone.
+
+TapeUP proposes to fill that missing layer. A builder should be able to choose a circuit container, define an issuance policy and create an asset whose supply and balances are settled by TapeOut's shared asset infrastructure. A holder should be able to transfer that asset without depending on the issuer's website or a private database. A third-party wallet should be able to resolve the issuing circuit, inspect the policy and verify a balance using public on-chain data.
+
+The intended result is not a new base-chain consensus network. TapeOut's home chain still orders transactions and secures state. It is a network-level asset standard for applications built on TapeOut.
+
 
 ## Specification
 
