@@ -51,7 +51,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ### 3. Passkey and key
 
-1. **PRF input.** `P = SHA-256("tap-private-files/prf/v1")`, that is `0x0ac22e54f858c69e60e07fdf6fccdf8b915dde06b5d5a8e5c815b34b7dfe52f1`. Every create and get ceremony **MUST** request `extensions.prf.eval.first = P`.
+1. **PRF input.** `P = SHA-256("tap-private-files/prf/v1")`, that is `0x0ac22e54f858c69e60e07fdf6fccdf8b915dde06b5d5a8e5c815b34b7dfe52f1`. Every create and get ceremony **MUST** evaluate the PRF at `P`, as `extensions.prf.eval.first` or `extensions.prf.eval.second`; the output depends only on the input, not on the slot, so a client can obtain this key and another of its own (for example the `0x03` key, or an application lock) in one ceremony.
 2. **RP ID.** The RP ID **MUST** be the exact host the client is served from (`location.hostname`), set explicitly as `rp.id` and `rpId`, and **MUST NOT** be a parent domain of it. On a gateway whose domain is not on the Public Suffix List (TAP-10 §8.8), a parent-domain RP ID would let every site on that gateway request the same passkey. A site reachable under several hosts (TAP-10 §3.3) **SHOULD** use one canonical host for private files, chosen by the holder; it is recorded in the file as `H` (§4).
 3. **Creating a passkey.** `user.id` **MUST** be the 20 bytes of the holder address, so that a device with no wallet can find the container from the passkey alone. `authenticatorSelection` **MUST** require a resident key and user verification. `excludeCredentials` **MUST** list every credential ID the client knows for this holder and RP ID: creating a second passkey with the same RP ID and `user.id` silently replaces the first in common passkey providers, and every file sealed to the first would become unreadable. If the result reports `prf.enabled == false`, the passkey **MUST NOT** be used. A provider that returns no PRF result at creation is asked once more with a get ceremony.
 4. **Using a passkey.** A get ceremony **MUST** set `userVerification: "required"`. A client that knows the credential ID **MUST** name it in `allowCredentials`.
@@ -142,17 +142,17 @@ A = a ‖ "|" ‖ base64url(C) ‖ "|" ‖ H
 
 ## Reference Implementation
 
-The TapeOut Authenticator, served from `288.732.tape` on BNB Smart Chain (container `0x1b21a2d9de0d4a7242f604c37290946c383937da`), as stored on chain at block 124,895,699. Its files are fixed by their SHA-256 in `SiteRegistry`:
+The TapeOut Authenticator, served from `288.732.tape` on BNB Smart Chain (container `0x1b21a2d9de0d4a7242f604c37290946c383937da`), as stored on chain at block 125,312,509. It writes `0x04` at `.private/authenticator/backup.bin`, reads `0x03` and older only at the legacy path and only until it has seen `0x04` in that container, and obtains both PRF outputs in one ceremony. Its files are fixed by their SHA-256 in `SiteRegistry`:
 
 | File | SHA-256 |
 |---|---|
-| `wallet.js` (format, key, limits) | `020ebb37b9c367bcf206b4fd1ac4be860c79163645a096541ac5f6ab8a800094` |
-| `passkey.js` (PRF, create, discover) | `e4639316145ae0dfa1426a6bfc237c3bbcd548ed05c9e4e8fec704b719784649` |
-| `tapeout.js` (reads, node agreement, write events) | `b6a795942a1ab30596a472100ce65c7d1ac3fee6b38eb8be3a1ece8a4562ea26` |
+| `wallet.js` (format, key, limits) | `71cd7871b14ce5bcee706631126bd83f3674088d8d8574a3fb19616b9f5d6389` |
+| `passkey.js` (PRF, create, discover) | `a2727d86658e15065f858b7351c61910b68b026262dd98a4c9db41d11fd20293` |
+| `tapeout.js` (paths, pinned block, strict agreement, write events) | `46efa6fb2fdc443b75d9324a1a8bbf6b1a711195550c42adb6845895dde87550` |
 | `device.js` (operator key) | `640b72363954f9006bea0e50002a53c30647d29d7d78667812482cc62de1df4f` |
-| `app.js` (writing, reading, rollback, downgrade) | `354c660de7d4d3b071acdbc2bb08f1c55bdd431b7b20820329359ea79c42d8d5` |
+| `app.js` (writing, reading, rollback, downgrade) | `0aa1ab11e4174dff964937985f5e5166679e0c65db48924e374574c0aa95a4ac` |
 
-It writes the `0x03` format at the legacy path (Backwards Compatibility) and does not yet write `0x04`; `vectors.mjs` is the reference for `0x04`. It offers an independent copy (§9.1) as an export of QR codes in the Google Authenticator migration format.
+It reads `fileInfo` (and, before authorising an operator, the path count and the container owner) under strict agreement at a pinned block, counting nodes by operator, and reads the content at the same block. Its test suite opens the `0x04` vector of `vectors.json` with its own derivation. It follows this draft except for the path of its pre-existing `0x03` file (Backwards Compatibility).
 
 ## Security Considerations
 
