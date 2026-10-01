@@ -1,58 +1,275 @@
 {
-  "prfInput": "9daa7a47279ba37c24cd44e7bf254ab1fc3a6ff8af7a67ae497dd760d5e91d82",
-  "derive": {
-    "prf": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-    "address": "0x1111111111111111111111111111111111111111",
-    "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7"
-  },
-  "aad": {
-    "address": "0x1111111111111111111111111111111111111111",
-    "id": "oKGio6SlpqeoqaqrrK2urw",
-    "rp": "288-732.aihashrate.stream",
-    "utf8": "0x1111111111111111111111111111111111111111|oKGio6SlpqeoqaqrrK2urw|288-732.aihashrate.stream"
-  },
-  "open": [
-    {
-      "name": "valid",
-      "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
-      "address": "0x1111111111111111111111111111111111111111",
-      "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
-      "plaintext": {
-        "at": 1790000000000,
-        "v": 2,
-        "accounts": [],
-        "gone": {}
+  "v4": {
+    "prfInput": "0ac22e54f858c69e60e07fdf6fccdf8b915dde06b5d5a8e5c815b34b7dfe52f1",
+    "derive": [
+      {
+        "prf": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2"
+      },
+      {
+        "prf": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/notes/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "key": "d05dd57e8f4477c3aa7493c2b85df15a6a54b52f60cc6a03d3a3e7ef58070a6a"
       }
+    ],
+    "aad": {
+      "loc": {
+        "chainId": 56,
+        "container": "0x3333333333333333333333333333333333333333",
+        "path": ".private/authenticator/backup.bin",
+        "address": "0x1111111111111111111111111111111111111111"
+      },
+      "id": "oKGio6SlpqeoqaqrrK2urw",
+      "rp": "288-732.aihashrate.stream",
+      "utf8": "tap-private-files/v4|56|0x3333333333333333333333333333333333333333|.private/authenticator/backup.bin|0x1111111111111111111111111111111111111111|oKGio6SlpqeoqaqrrK2urw|288-732.aihashrate.stream"
     },
-    {
-      "name": "last byte flipped",
-      "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
-      "address": "0x1111111111111111111111111111111111111111",
-      "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb2",
-      "error": true
+    "open": [
+      {
+        "name": "valid",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "plaintext": {
+          "at": 1790000000000,
+          "v": 2,
+          "accounts": [],
+          "gone": {}
+        }
+      },
+      {
+        "name": "last byte flipped",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfa",
+        "error": true
+      },
+      {
+        "name": "other address",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x2222222222222222222222222222222222222222"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "other path, same key",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/notes/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "other path, its own key",
+        "version": 4,
+        "key": "d05dd57e8f4477c3aa7493c2b85df15a6a54b52f60cc6a03d3a3e7ef58070a6a",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/notes/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "other container",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 56,
+          "container": "0x4444444444444444444444444444444444444444",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "other chain",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 196,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "other key",
+        "version": 4,
+        "key": "cef171614adeabc6e2681e717c5382e0ecf5a4a26d6cf88e66cdf45137cdd04f",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0410a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "unknown version",
+        "version": 4,
+        "key": "afedf41da1cf740ffd7dd7f628a726d32c81e76cf73e678c7d38ccdc94926ea2",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".private/authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0910a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ca20be87e877f981b0670c2c2408ae147ed2d83085aeeb64a0989e2228499fbae34ed264551b3a74663efa7a582731b4799b9f2d3aa8ff1142cef9dfb",
+        "error": true
+      },
+      {
+        "name": "0x03 file read as 0x04",
+        "version": 4,
+        "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
+        "error": true
+      }
+    ]
+  },
+  "v3": {
+    "prfInput": "9daa7a47279ba37c24cd44e7bf254ab1fc3a6ff8af7a67ae497dd760d5e91d82",
+    "derive": [
+      {
+        "prf": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7"
+      }
+    ],
+    "aad": {
+      "loc": {
+        "chainId": 56,
+        "container": "0x3333333333333333333333333333333333333333",
+        "path": ".authenticator/backup.bin",
+        "address": "0x1111111111111111111111111111111111111111"
+      },
+      "id": "oKGio6SlpqeoqaqrrK2urw",
+      "rp": "288-732.aihashrate.stream",
+      "utf8": "0x1111111111111111111111111111111111111111|oKGio6SlpqeoqaqrrK2urw|288-732.aihashrate.stream"
     },
-    {
-      "name": "other address",
-      "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
-      "address": "0x2222222222222222222222222222222222222222",
-      "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
-      "error": true
-    },
-    {
-      "name": "other key",
-      "key": "c825369a874df7240a423a0f6ed044487079f3885fc512bf7d2f87d6d35ac923",
-      "address": "0x1111111111111111111111111111111111111111",
-      "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
-      "error": true
-    },
-    {
-      "name": "unknown version",
-      "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
-      "address": "0x1111111111111111111111111111111111111111",
-      "file": "0910a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
-      "error": true
-    }
-  ],
+    "open": [
+      {
+        "name": "valid",
+        "version": 3,
+        "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
+        "plaintext": {
+          "at": 1790000000000,
+          "v": 2,
+          "accounts": [],
+          "gone": {}
+        }
+      },
+      {
+        "name": "last byte flipped",
+        "version": 3,
+        "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb2",
+        "error": true
+      },
+      {
+        "name": "other address",
+        "version": 3,
+        "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x2222222222222222222222222222222222222222"
+        },
+        "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
+        "error": true
+      },
+      {
+        "name": "other key",
+        "version": 3,
+        "key": "c825369a874df7240a423a0f6ed044487079f3885fc512bf7d2f87d6d35ac923",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0310a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
+        "error": true
+      },
+      {
+        "name": "unknown version",
+        "version": 3,
+        "key": "f0fd6eb84f72db33c851d7b10dd94ddab5e24c6eab6047b1363004bc91f9bbd7",
+        "loc": {
+          "chainId": 56,
+          "container": "0x3333333333333333333333333333333333333333",
+          "path": ".authenticator/backup.bin",
+          "address": "0x1111111111111111111111111111111111111111"
+        },
+        "file": "0910a0a1a2a3a4a5a6a7a8a9aaabacadaeaf193238382d3733322e616968617368726174652e73747265616d0102030405060708090a0b0ce5fc54264ff3d564ecb1968dd43b76ac76f3e3f41d374489d79a072b19fe1862c41cf9a6578c314c888c254ba0168724434acec59568ca2e6bd06bb3",
+        "error": true
+      }
+    ]
+  },
   "canonicalId": {
     "given": "abc_DEF-123",
     "canonical": "abc_DEF-120"
