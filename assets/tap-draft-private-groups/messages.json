@@ -1,0 +1,43 @@
+{
+  "note": "Generated from the reference implementation at BruceLanLan/tapeapi@4a1ac4fe2a0b2e3327652a794794765dd5da98ef (TapeAPI 1.8.1, with the option labels: 'v2') (sdk/src/group.js, sdk/src/channel.js, sdk/src/canon.js) and reproduced by it (every value and every outcome). Byte strings are lowercase hex with 0x, except inside roster and invite objects and in prev, which are written as a roster carries them (bare hex for gid and prev). Every field is an input or an exact expected output; sdkCode and sdkError are the reference implementation's error code and message and are informative only. The values are those of spec/vectors/tapi-27-v2-group.json at that commit.",
+  "covers": "§6 (group messages): the sender keys of epoch 0 of epoch.json and two messages. seq = 1789000000000 × 2^16, the value a sender starting from the clock at 1789000000 s draws (§6.2).",
+  "epoch": 0,
+  "gid": "0x678391a8b4bcd8e6fd09112d3b525e66",
+  "K": "0x86a2b0c7d3dbf7051c28304c5a717d85a1afc6d2daf6041b272f4b59707c84a0",
+  "senderKeys": [
+    {
+      "sender": 0,
+      "key": "0xad821e56ccfee170bff514fd18e986c151ccf82fc792728f7be918e743a55491"
+    },
+    {
+      "sender": 1,
+      "key": "0xe3ba31e6a96cbb2372bffdc628b46c020ee9b918a6fd8bbc7db31efb1fa221a1"
+    },
+    {
+      "sender": 2,
+      "key": "0xb900bf088a22fb140650f7a3018a22f68a2dd62be6cd44ffe6cb37b5da72e4f4"
+    }
+  ],
+  "messages": [
+    {
+      "sender": 0,
+      "seq": "117243904000000000",
+      "nonce": "0x6d84896074c2d9deb5c9172e330a1e6c83885f73c1d8ddb4",
+      "plaintext": "hello, group",
+      "header": "0x05678391a8b4bcd8e6fd09112d3b525e6600000000000000000000000001a088b5a20000006d84896074c2d9deb5c9172e330a1e6c83885f73c1d8ddb4",
+      "ciphertext": "0x355ce2271a443ef2f6d89c8887e4af6eb1724f10c299f1bca7f8fd5f",
+      "signature": "0xf5b1e7e0093366b36c6fabaa7c630dd09e4db4f7cf8ad220063f7e4320c5a9566c10de3ad82db27c417d8672f47a0cbb81afe071cf2fbc687df82f94eef0430e",
+      "wire": "0x05678391a8b4bcd8e6fd09112d3b525e6600000000000000000000000001a088b5a20000006d84896074c2d9deb5c9172e330a1e6c83885f73c1d8ddb4355ce2271a443ef2f6d89c8887e4af6eb1724f10c299f1bca7f8fd5ff5b1e7e0093366b36c6fabaa7c630dd09e4db4f7cf8ad220063f7e4320c5a9566c10de3ad82db27c417d8672f47a0cbb81afe071cf2fbc687df82f94eef0430e"
+    },
+    {
+      "sender": 1,
+      "seq": "117243904000000000",
+      "nonce": "0x6d84896075c2d9deb5ca172e330a1f6c83885f74c1d8ddb4",
+      "plaintext": "你好 from member 1",
+      "header": "0x05678391a8b4bcd8e6fd09112d3b525e6600000000000000000000000101a088b5a20000006d84896075c2d9deb5ca172e330a1f6c83885f74c1d8ddb4",
+      "ciphertext": "0xb60a19ea1ec0b0b032291b0d3189fc8f1a8cfbe8f3861917bcdc096e79df1b47558cd834",
+      "signature": "0x26c25439eafec7b3e8e4879e0edccbe33c2b4bdb7e59a65f2d5fbfe03965e0fdb3531ed8e2746f8eaca9f050dcd99f26657e3d8331d6fd10d5f9e071b5cc3702",
+      "wire": "0x05678391a8b4bcd8e6fd09112d3b525e6600000000000000000000000101a088b5a20000006d84896075c2d9deb5ca172e330a1f6c83885f74c1d8ddb4b60a19ea1ec0b0b032291b0d3189fc8f1a8cfbe8f3861917bcdc096e79df1b47558cd83426c25439eafec7b3e8e4879e0edccbe33c2b4bdb7e59a65f2d5fbfe03965e0fdb3531ed8e2746f8eaca9f050dcd99f26657e3d8331d6fd10d5f9e071b5cc3702"
+    }
+  ]
+}
