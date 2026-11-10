@@ -6,9 +6,9 @@ author: TapeOut (@TapeOutProtocol)
 discussions-to: https://github.com/TapeOutProtocol/TAPs/pull/2
 status: Draft
 type: Standards
-version: 1.1
+version: 1.2
 created: 2026-09-17
-updated: 2026-09-28
+updated: 2026-11-03
 license: CC0-1.0
 ---
 
@@ -27,7 +27,7 @@ A TapeOut circuit container is an ERC-6551 account bound to a circuit NFT. DeWEB
 
 Both layers share one set of names, one chain table, one resolution procedure and one rule for reading the chain: several independent nodes must agree, all reads are pinned to one block, and a client never accepts an address that someone merely reports (§1–§5). There is no DNS, bridge, indexer or server in either path.
 
-Status: **Draft**, version 1.1. The access layer replaces the tape:// specification v0.2 (TapeKit `SPEC.md`, 2026-09-13); the messaging layer replaces TAP-10 v1.0 (2026-09-18). Following TAP-01, this TAP becomes Candidate once reviewed, and Final once the contracts it depends on are sealed or no longer upgradeable on every active chain (Deployments). As of 2026-09-27 none of them is sealed. The contracts and clients were reviewed internally only; **no independent audit has been published**.
+Status: **Draft**, version 1.2. The access layer replaces the tape:// specification v0.2 (TapeKit `SPEC.md`, 2026-09-13); the messaging layer replaces TAP-10 v1.0 (2026-09-18). Following TAP-01, this TAP becomes Candidate once reviewed, and Final once the contracts it depends on are sealed or no longer upgradeable on every active chain (Deployments). As of 2026-11-03 none of them is sealed; the processor beacons were renounced on 2026-10-22, so the code of existing processors can no longer change (§13.8). The contracts and clients were reviewed internally only; **no independent audit has been published**.
 
 ## Motivation
 
@@ -109,7 +109,8 @@ Every processor numbers its #IDs from 1, so a #ID alone does not identify a circ
 - A name with an area code denotes a circuit on that chain only; a name without an area code denotes a circuit on BNB Smart Chain. An area code that is not in §2.1 (including `0` and `1`) is an input error;
 - The on-chain name is also, character for character, the name registered in the payment contract (§6.3);
 - `#` is the URL fragment delimiter, so the display label is only for display and typing; URLs use the on-chain name;
-- A client **MUST** produce identical resolution results for every form of one name. A chain that is not in §2.1 is displayed as `#<#ID>@<processor number>.chain<chainId>`; that form **MUST NOT** be accepted as input.
+- A client **MUST** produce identical resolution results for every form of one name. A chain that is not in §2.1 is displayed as `#<#ID>@<processor number>.chain<chainId>`; that form **MUST NOT** be accepted as input;
+- Wherever a client shows a name, it **MUST** show the complete name, including the area code, and **SHOULD** also show the processor name and the holder: names are digits only, and `4246.0` and `4264.0`, or two area codes, are easy to confuse.
 
 ### 3.2 URLs
 
@@ -131,6 +132,8 @@ A Service Worker gateway (§8.8) carries the name in one DNS label, because a wi
 ```
 
 A label is valid only if it matches `^[1-9][0-9]*-(?:[1-9][0-9]*-)?(0|[1-9][0-9]*)$` and the resulting name is valid under §3.1.
+
+A gateway that also offers the server-read tier (§8.10) gives each site a second label: the same label followed by `-open`, for example `4246-0-open.<gateway domain>`. It is a suffix rather than another DNS level for the same reason as above. A client removes one trailing `-open` before applying the pattern. A gateway answers a host with that suffix in the server-read tier and never sends its bootstrap there; if the gateway's own Service Worker is registered on such a host (a site may register `/sw.js`, which belongs to the gateway), it serves the host like the label without the suffix.
 
 ### 3.4 Input
 
@@ -310,6 +313,8 @@ Site code **MUST** run in one of these environments:
 - **An opaque origin (preview mode).** A sandboxed iframe **without** `allow-same-origin`. The site cannot read or write any persistent storage and cannot touch the shell page;
 - **A Service Worker gateway.** An ordinary HTTPS domain with one subdomain per site (§3.3). The server returns the same bootstrap for every subdomain and path; once the bootstrap has installed the Service Worker, every same-origin request is resolved, read and verified against the chain inside the user's browser, and the server never handles site content (§8.8).
 
+The server-read tier of §8.10 is none of these: there the gateway, not the browser, verifies, and it is not a shell under this section.
+
 Two sites **MUST NOT** share an origin, and a site **MUST NOT** share an origin with the shell's own pages. A shell **MUST NOT** let other origins frame a site (for example `frame-ancestors 'self'`).
 
 ### 8.2 Privileged contexts
@@ -330,7 +335,8 @@ After a circuit changes hands, the old data under the same origin remains; shell
 - A wallet (for example `window.ethereum`) **MAY** be available only under a real, independent origin; preview mode **MUST NOT** inject one;
 - For every connection or signing request, the wallet interface **MUST** show the on-chain name, the processor name and the container address, not only the page's title;
 - Wallet permissions **MUST** be recorded per origin, that is per site;
-- A shell that injects a wallet **MUST** refuse raw-hash signing and any `personal_sign` text containing `tapesend:hub:`: whoever holds that signature holds a TapeSend key (§14.2).
+- A shell that injects a wallet **MUST** refuse raw-hash signing and any `personal_sign` text containing `tapesend:hub:`: whoever holds that signature holds a TapeSend key (§14.2);
+- The official messaging client (this binds the messaging client, not shells) **MUST NOT** be served from a domain that also serves user sites: a site served there could request the §14.2 signature under the domain users are told to trust.
 
 ### 8.5 Network access
 
@@ -346,18 +352,34 @@ After a circuit changes hands, the old data under the same origin remains; shell
 
 ### 8.7 Displaying identity
 
-The shell's address bar or title bar **MUST** always show the on-chain name, the activation status and the verification status (§7.1). The page's own `<title>` may only be a subtitle. Names are all digits and have no look-alike letters, but `4246.0` and `4264.0` can still be confused, so shells **SHOULD** also show the processor name and the holder.
+The shell's address bar or title bar **MUST** always show the on-chain name, the activation status and the verification status (§7.1). The page's own `<title>` may only be a subtitle. Names are all digits and have no look-alike letters, but `4246.0` and `4264.0` can still be confused; §3.1 also asks for the processor name and the holder.
 
 ### 8.8 Service Worker gateways
 
-- **Trust boundary:** the bootstrap files (the bootstrap page, `sw.js` and its imports) are the only download that must be trusted. They **MUST** be open source and contain no external resources, and anyone must be able to run a gateway from the same files. Files served from the gateway's own paths **MUST** be locked (`default-src 'none'; sandbox`) when opened as documents;
+- **Trust boundary:** the bootstrap files (the bootstrap page, `sw.js` and its imports) are the only download that must be trusted. They **MUST** be open source and contain no external resources, and anyone must be able to run a gateway from the same files. Files served from the gateway's own paths **MUST** be locked (`default-src 'none'; sandbox`) when opened as documents. The server-read tier (§8.10) lies outside this boundary;
 - **Nodes do not belong to the gateway:** reads happen in the user's browser with the client's node list. A node the operator adds counts as one operator's vote; the agreement rules do not change;
 - **Reserved paths:** `/sw.js` and the `/.tape/` prefix belong to the gateway; site files at those paths are never read. Every site **MUST** have a status page at `/.tape/status` showing identity, activation, verification, off-chain references and requests, and node statistics;
 - **Gateway pages:** the status page, settings and every notice or error page **MUST NOT** contain scripts, **MUST** carry a Content Security Policy that forbids framing them and loading anything else, and **MUST NOT** echo the requested path or other attacker-chosen text;
-- **Headers:** verified responses **SHOULD** carry `x-tape-name`, `x-tape-status`, `x-tape-container`, `x-tape-block`, `x-tape-sha256` and `x-tape-verified`;
+- **Headers:** verified responses **SHOULD** carry `x-tape-name`, `x-tape-status`, `x-tape-container`, `x-tape-block`, `x-tape-sha256`, `x-tape-verified` and `x-tape-mode` (`client`; `server` in the tier of §8.10);
 - **Requests the gateway cannot see:** WebSocket, WebRTC, some cross-origin frames and requests started while the Service Worker is not controlling the page do not pass through it. Documentation **SHOULD** say so, and the indication of §9 **MUST** take it into account;
 - **Sibling subdomains:** cookies can be set on the parent domain and leak between sites. Production gateways **SHOULD** put their domain on the Public Suffix List, so that every subdomain is a separate site with its own process and storage partition;
 - **Hard reload** (Shift+Reload) bypasses the Service Worker once; the bootstrap page **SHOULD** explain this.
+
+### 8.9 Private paths
+
+Paths under `.private/` hold data that an application encrypts for the holder, such as an encrypted backup; they are data, not pages. A shell **SHOULD NOT** render a file under `.private/` as a page and **MAY** answer such a request as not found.
+
+### 8.10 Server-read gateway tier
+
+Some browsers cannot run a Service Worker (the in-app browsers of chat apps, some private modes), and a Service Worker gateway shows them nothing. A gateway **MAY** offer them a **server-read tier**: the gateway reads the chain, verifies each file under §7.1 on its server and returns the bytes. This tier is not a shell in the sense of this section: the visitor's browser verifies nothing and must trust the gateway, which could serve other bytes undetected. A gateway that offers it **MUST** meet all of the following:
+
+1. The tier is served only under the `-open` labels of §3.3, never under a site's own label, so the address bar shows which tier is in use;
+2. The bootstrap switches to it only when a Service Worker cannot be installed (the browser has no Service Worker interface, or registration fails), never because an installed Service Worker has not yet taken control of the page;
+3. The tier's status page (`/.tape/status`) says that the gateway read and verified the files on its server and names the site's self-verifying host, and every notice or error page of the tier links to that status page;
+4. Every file response carries `x-tape-mode: server`;
+5. Responses carry the same Content Security Policy and other security headers as the self-verifying tier. `/sw.js` and `/.tape/` are served by the gateway, never read from the chain, and a request that carries the header `Service-Worker: script` is never answered from the chain, so that a site cannot install its own Service Worker on the tier's origin;
+6. Nodes and agreement (§5), site resolution and status (§6), file verification and paths (§7), the blocklist (§10) and caching (§11) apply as for any client;
+7. The tier does not claim "100% on-chain" (§9).
 
 ## 9. The on-chain indication
 
@@ -461,8 +483,7 @@ The container is then the author. Consequences:
 
 - only the current holder of an opened circuit on a registered processor can write for its container; after a transfer the new holder speaks for the same container;
 - `send` and `revokeKey` accept **any** holder, including contracts. A contract the holder approved for the circuit NFT (for example a marketplace) can therefore take the NFT, write as the container and return it within one transaction. The hub cannot see this; clients detect it (§18.5);
-- a lasting replacement of the processor implementation stops every write and makes every key unusable; a new hub would be needed;
-- the pin cannot detect a **temporary** replacement by whoever controls an unsealed factory (§13.8).
+- a lasting replacement of the processor implementation would stop every write and make every key unusable, so that a new hub would be needed, and the pin cannot detect a **temporary** replacement; both need control of the circuit beacon, which no one has once the processors are frozen (§13.8). Until the factory seal is in effect, whoever controls the factory can still make `isCPU` false for a processor (step 3), which stops every write for its circuits and makes their keys unusable for as long as it lasts.
 
 ### 13.5 Interface
 
@@ -539,20 +560,22 @@ The payload itself is **not** stored; it is only in the `Sent` event. The digest
 
 Every future implementation **MUST** satisfy the two checks above and keep the storage of §13.3. Because v2 and the boot implementation lack `selfAddress`, the hub cannot be downgraded from v3.
 
-`seal()` does not itself check that the TapeOut factory is sealed. The factory **MUST** be sealed first (§13.8); otherwise a later lasting change of the processor implementation stops the sealed hub for good.
+`seal()` does not itself check the processors. They **MUST** be frozen first (§13.8); otherwise a later lasting change of the processor implementation stops the sealed hub for good. Until the factory seal is also in effect, whoever controls the factory can still stop a sealed hub for any processor through `isCPU` (§13.4).
 
 ### 13.8 Seal status and trust
 
 At the pinned block and under strict agreement, a client **MUST** read:
 
-1. **Factory:** `factory.isSealed()`, the factory's ERC-1967 implementation slot, `circuitBeacon.owner()` and `circuitBeacon.implementation()`. The factory seal is in effect only when `isSealed()` returns exactly 1, the factory implementation is the one listed for that chain under Deployments, the beacon's owner is the factory, and the beacon's implementation is `circuitImplementation`;
-2. **Hub:** `hub.isSealed()`, `hub.owner()` and the hub's ERC-1967 implementation slot. The hub is **accepted** only when the slot holds the implementation listed as current for that chain under Deployments (`hub-changed` otherwise). The hub seal is in effect only when, in addition, `isSealed()` is 1 and `owner()` is 0.
+1. **Processors:** `circuitBeacon.owner()` and `circuitBeacon.implementation()`. The processors are **frozen** when the beacon's owner is 0 and its implementation is `circuitImplementation`: no one can then upgrade the beacon, so the code of every processor is fixed;
+2. **Factory:** `factory.isSealed()` and the factory's ERC-1967 implementation slot. The factory seal is in effect only when the processors are frozen, `isSealed()` returns exactly 1 and the factory implementation is the one listed for that chain under Deployments;
+3. **Hub:** `hub.isSealed()`, `hub.owner()` and the hub's ERC-1967 implementation slot. The hub is **accepted** only when the slot holds the implementation listed as current for that chain under Deployments (`hub-changed` otherwise). The hub seal is in effect only when, in addition, `isSealed()` is 1 and `owner()` is 0.
 
 Any revert, any non-canonical word (upper 96 bits of an address word non-zero) or any other value counts as not in effect.
 
 - If `circuitBeacon.implementation()` is not `circuitImplementation`, messaging on that hub has stopped (`circuits-changed`); the client **MUST NOT** send and **MUST** keep this status even if later reads show the pinned value again;
 - If the hub is not accepted, the client **MUST NOT** send;
-- While either seal is not in effect, whoever controls the factory or the hub owner can impersonate endpoints and replace keys. A client **SHOULD** indicate this wherever it shows sender identities or encrypts. A client that has once seen the factory seal in effect and later sees it not in effect at a block not earlier than the first **MUST** keep treating the seal as lost;
+- Until the processors are frozen, whoever controls the circuit beacon can change what every processor reports, and so write as any container and replace keys. Once they are frozen, the holder of an existing circuit can no longer be faked, but while the factory seal is not in effect whoever controls the factory can still change the processor table that names resolve through (§4.2, §4.3) and can deregister a processor (`isCPU`, §13.4), which stops writes and keys for all its circuits; while the hub seal is not in effect the hub owner can replace keys and inbox entries (§13.7). A client **SHOULD** indicate this wherever it shows sender identities or encrypts;
+- Freezing cannot be undone on chain, and a seal cannot be lifted. A client that has once seen the processors frozen and later sees them not frozen, or has once seen the factory seal in effect and later sees it not in effect, at a block not earlier than the first, **MUST** keep treating both as lost;
 - An upgrade can rewrite storage within one transaction and restore an accepted implementation, leaving only an `Upgraded` log. When log-capable nodes are available, a client **SHOULD** read every `Upgraded` log of the hub and accept the hub only if every implementation it names is the boot implementation or listed under Deployments (current or replaced).
 
 The seals are recorded per chain and per hub address; sticky statuses of one chain **MUST NOT** affect another.
@@ -807,7 +830,7 @@ A client verifies every asset attachment of message `m` on the chain named by it
 11. `unavailable` — the transfer's block time could not be read;
 12. `stale` — the transfer's block time is more than 3,600 seconds before `m`'s block time;
 13. `crowded` — walking the same inbox backwards from `m`, more than 60 entries lie at or after the transfer's block;
-14. `not-first` — one of those earlier entries is from the same sending container, or its message (§18.5) has the same sending wallet (an earlier entry whose wallet cannot be determined makes the result `unavailable`);
+14. `not-first` — one of those earlier entries is from the same sending container, or its message (§18.5) has the same sending wallet. An earlier entry whose sending wallet cannot be determined (§18.5, as in step 8) makes the result `unavailable`; an earlier entry whose sender is indirect (§18.5) has no sending wallet and is compared by its sending container only;
 15. `ok` — otherwise.
 
 Only `ok` proves that the sender paid this recipient for this message. A client **SHOULD** show `ok` as positive only for tokens on its list of known contracts; any other token is shown neutrally, and a token whose symbol contains non-ASCII characters or imitates a known symbol **SHOULD** be flagged as a possible fake. Within one message, a second attachment with the same `tx` is a repeat and **MUST NOT** be counted again. `mismatch`, `not-first` and repeats **SHOULD** be shown as warnings.
@@ -861,6 +884,8 @@ Versions follow TAP-01 §6.3. Contract addresses are not tied to versions of thi
 - **Pinned implementations, fail-closed.** The site and hub contracts are upgradeable until sealed. Pinning the accepted implementations in the client means an upgrade takes effect only after the new code is reviewed and the list is updated in public.
 - **Off-chain data allowed, off-chain code not** (§8.5). SPEC.md v0.2 blocked all off-chain requests in preview mode. Sites that connect wallets through relays, stream video or call public APIs cannot work that way, so the reference shells changed on 2026-09-19 (TapeKit `489956e`) to allow off-chain data while recording it, and to keep code on chain. The "100% on-chain" indication (§9) keeps the difference visible.
 - **Public messages to any chain** (§14.4). An endpoint without a key has no bitmap saying which chains it reads; the reference client reads every active chain, so allowing public messages from any chain matches what recipients actually see.
+- **A server-read tier, outside the shell rules** (§8.10). In-app browsers that block Service Workers are where shared links are opened most, and a self-verifying gateway shows them nothing (TapeKit `40994bd`). Calling such a tier a shell would loosen §8, which §21 does not allow a new version to do; so it is described as what it is, a place where the visitor trusts the gateway, with its own label and its own requirements.
+- **Frozen processors before seals** (§13.8). Renouncing the circuit beacons fixes the code of every existing processor, which removes the largest power of the factory owner even while the factory itself stays upgradeable. The factory seal and the hub seal are therefore defined on top of it, and the hub is sealed only after it (§13.7).
 - **Deployments in the TAP.** Clients must pin addresses and implementations; putting them in the TAP gives every implementation the same list and a public history of changes.
 
 ## Backwards Compatibility
@@ -886,13 +911,20 @@ Clients built for v0.2 resolve BNB Smart Chain names exactly as before. They rej
 - A public message to an endpoint without a usable key may come from any active chain; clients should read their inbox on every active chain;
 - The hub contracts, interface, storage, key derivation, payload format `0x02`, content, message IDs and attachment verification are unchanged, so every message and key written under v1.0 remains valid.
 
+**From TAP-10 v1.1** (2026-09-28):
+
+- Gateways may serve a server-read tier under `-open` host labels (§3.3, §8.10). A v1.1 client rejects such a label as invalid; self-verifying labels are unchanged;
+- The factory seal now builds on frozen processors (beacon owner 0) instead of a beacon owned by the factory, and the factory implementations changed on 2026-10-22 (§13.8, Deployments). A v1.1 client therefore never sees the factory seal in effect, even after the factory is sealed, and keeps warning, which fails safe; it does not report the processors as frozen;
+- §19 step 14 now says how an earlier indirect entry is compared; the reference implementation already behaved this way;
+- Requirements on implementations that v1.1 stated under Security Considerations now stand in §3.1 and §8.4, unchanged; shells gain one recommendation (§8.9). Payload format `0x02`, keys, the hub and every message and key written under v1.1 are unchanged.
+
 Appendix C lists the changes in detail.
 
 ## Test Cases
 
 ### Access layer
 
-Resolved with the reference kernel at TapeKit `f1831a4` against mainnet, read-only, on 2026-09-27 between 19:30 and 19:35 UTC (BNB Smart Chain blocks 124389066–124389111, Base 51874039–51874048, X Layer 71768388–71768407). Every implementation **MUST** give the same results at those blocks. Results that depend on later chain state (payment expiry, file updates) are marked.
+Resolved with the reference kernel at TapeKit `f1831a4` against mainnet, read-only, on 2026-09-27 between 19:30 and 19:35 UTC (BNB Smart Chain blocks 124389066–124389111, Base 51874039–51874048, X Layer 71768388–71768407). Every implementation must give the same results at those blocks. Results that depend on later chain state (payment expiry, file updates) are marked.
 
 | Input | Expected |
 |---|---|
@@ -917,7 +949,7 @@ Resolved with the reference kernel at TapeKit `f1831a4` against mainnet, read-on
 
 ### Messaging layer
 
-`send/module/test/vectors.json` in TapeKit (unchanged from v1.0 to commit `f1831a4`) contains, and every implementation **MUST** reproduce:
+`send/module/test/vectors.json` in TapeKit (unchanged from v1.0 to commit `f1831a4`) contains, and every implementation must reproduce:
 
 1. §14.2 for `#4246@0`, container `0x86DDaEF00401E3F10418398D67D7189fc458eA95`, a fixed test wallet and a test hub, with `k = 0` and `k = 1`: the text, its bytes, length and SHA-256, the signed hash, the signature, normalized `r ‖ s`, the HKDF info, the seed and the public key;
 2. §15.3 with fixed `e`, `N`, `K`, two recipient keys, `to`, `from`, `ref` and hub: `E`, `D`, `X`, `P`, per slot the shared secret, `kek`, fingerprint and wrapped key, `C` and the payload;
@@ -931,7 +963,7 @@ Resolved with the reference kernel at TapeKit `f1831a4` against mainnet, read-on
 
 ## Reference Implementation
 
-All in [TapeOutProtocol/TapeKit](https://github.com/TapeOutProtocol/TapeKit) at commit `f1831a44160e7a5a31385c05f1cdf64f25619516` (2026-09-20), MIT licensed. The later commit `da14c93` (2026-09-27) changes only a gateway end-to-end test.
+All in [TapeOutProtocol/TapeKit](https://github.com/TapeOutProtocol/TapeKit) at commit `37c617e7e332787c8a32a81e4d7d05a28a06c156` (2026-10-22), MIT licensed. Version 1.1 of this TAP referred to `f1831a44160e7a5a31385c05f1cdf64f25619516` (2026-09-20). Since then `40994bd` (2026-10-11) added the server-read gateway tier (§8.10) and `37c617e` the frozen-processor checks and the new factory implementations (§13.8); the other commits change tests and READMEs.
 
 | Component | Location | Covers |
 |---|---|---|
@@ -941,7 +973,7 @@ All in [TapeOutProtocol/TapeKit](https://github.com/TapeOutProtocol/TapeKit) at 
 | Kernel | `kernel/` | §6, §7, §11: multi-chain routing, implementation pinning, activation, file verification, paths, caching |
 | Web viewer | `viewer/` | Preview-mode shell (§8.1 opaque origin) |
 | Browser extension | `extension/` | Address-bar keyword `tape`, sandboxed rendering |
-| Service Worker gateway | `sw-gateway/` | §8.8, §9, §10 |
+| Service Worker gateway | `sw-gateway/` | §8.8, §9, §10; the server-read tier of §8.10 in `sw-gateway/worker.js` |
 | Hub contracts | `send/contracts/` | §13: `DeWebHub`, `DeWebAdmin`, `DeWebProxy`, `DeWebBoot`; unit, fuzz, invariant, fork and pinned-address tests for all three chains |
 | Messaging module | `send/module/` | §12, §14–§19: keys, payload, content and attachments, strict chain reads, finality; test vectors |
 | Messaging client | `apps/tapesend/` | §18–§20: web, desktop (Electron) and mobile (Capacitor); reads the inbox on every active chain, switches the wallet to the sender's chain, blocks sending when a hub is not accepted |
@@ -951,19 +983,25 @@ Known gaps between this text and the reference implementation at that commit:
 - `chainIdOfInput` in `send/module/src/chain.js` resolves input without chain information on BNB Smart Chain only; §4.1 requires every active chain;
 - The tape:// kernel does not make the `eth_chainId` check that §5.4 recommends for shells;
 - `send/README.md` still describes Base and X Layer as planned;
-- The test vectors do not yet include a Base or X Layer container for §14.2, and `kernel/test/mainnet.test.mjs` still expects the 756-byte `index.html`.
+- The test vectors do not yet include a Base or X Layer container for §14.2;
+- The shells do not yet treat paths under `.private/` specially (§8.9, a recommendation added in version 1.2);
+- The server-read tier in `sw-gateway/worker.js` answers Service Worker script requests from the chain, so a site opened on an `-open` host in a browser that supports Service Workers can register its own Service Worker there (§8.10 item 5);
+- Both gateway tiers read paths under `/.tape/` other than the gateway's own files and pages (the bootstrap files, `/.tape/status`, `/.tape/settings`, `/.tape/csp-report`) from the chain, where §8.8 reserves the whole prefix;
+- The server-read tier's page for unexpected errors (the last `catch` in `sw-gateway/worker.js`) does not link to the status page and shows the error text (§8.10 item 3);
+- `firstAfterTransfer` in `apps/tapesend/src/data/tapesend.ts` returns `not-first` as soon as it meets the same sending container within the first 60 entries, before checking `crowded`; §19 checks step 13 first. Both outcomes are warnings.
 
 ## Deployments
 
-Read back on mainnet on 2026-09-27 at 19:34 UTC, read-only, from two operators per chain at one pinned block: BNB Smart Chain block 124389612, Base block 51874173, X Layer block 71768710. Every value below matched on both operators, and no hub or factory was sealed. Anyone can repeat the check with `eth_getCode`, `eth_getStorageAt` and `eth_call` (the ERC-1967 implementation slot is `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`), or recompute the hub addresses from source (§13.2).
+Read back on mainnet on 2026-11-03 at 08:04 UTC, read-only, from two operators per chain at one pinned block: BNB Smart Chain block 131397702, Base block 53451872, X Layer block 74924091. Every value below matched on both operators. Version 1.1 listed a read of 2026-09-27; since then only the factory implementations and the owner of the circuit beacons changed, on 2026-10-22. Anyone can repeat the check with `eth_getCode`, `eth_getStorageAt` and `eth_call` (the ERC-1967 implementation slot is `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`), or recompute the hub addresses from source (§13.2).
 
 ### TapeOut and site contracts
 
 | Contract | BNB Smart Chain (56) | Base (8453) and X Layer (196) |
 |---|---|---|
 | Processor factory (UUPS proxy) | `0x68224F668083c29e9800Be2a646d42d18cedF7e2` | `0x1f09DAeFA827f02CBb40967cc91b259763760761` |
-| Factory implementation (seal constant, §13.8) | `0xa68cCF4931d98ad0A4BE15eE40542eDc0DEc6422` | `0x74956236Ab64eD143933040B4137E8A352e4d17b` |
+| Factory implementation (seal constant, §13.8) | `0x77080dD83C16BdF6D71055c3A191FC890b5a8fe2` (since 2026-10-22; before, no longer the seal constant: `0xa68cCF4931d98ad0A4BE15eE40542eDc0DEc6422`) | Base `0xefC6B7eaEa35a4894c980b74cB1d5d468AE2B4D4`, X Layer `0xb41C1E7602EB5734BE2430b72178cCb814A5293d` (since 2026-10-22; before, no longer the seal constant: `0x74956236Ab64eD143933040B4137E8A352e4d17b` on both) |
 | Circuit beacon | `0xf8D6d8EB894d6971c8976Ad8b4971cbEFE028156` | `0xf70d1ed4f62CF3780157B0b421b7E2F45bD0991C` |
+| Circuit beacon owner | `0x0000000000000000000000000000000000000000` (renounced 2026-10-22, block 129161678) | the same (renounced 2026-10-22: Base block 52946323, X Layer block 73915513) |
 | Circuit implementation | `0x8E1D125Def6d3826C278299273a0760D47626068` | `0x977f217887E085D298Cb3819cDAD5A0ee35F29B2` |
 | Processor proxy code hash | `0xd8c4b0216e0aadd615fbd134465b6af060a11769edc7c844d8f14d1b8a783992` | `0x57aa306fd0be97087da3534e03398f5ff4efd533b5be4e45a405ce86fa6717d5` |
 | Container opener | `0x021745DE2f42A7839d96f2d3634d0294487D81F1` | `0x536adD8F30f03b69f6fbF29d425A816A0dC50106` |
@@ -975,7 +1013,7 @@ Read back on mainnet on 2026-09-27 at 19:34 UTC, read-only, from two operators p
 | Payment contract `DomainBinding` (UUPS proxy) | `0x861EE183de2BBE4a6ecf9D15812C123b566a3DB7` | `0x68809Fd2fb343aA57D0aeB7f33Defe477c9666f9` |
 | Accepted payment contract implementations | `0xaa226181a6588d3f9AC0035e5f3dBaF311039bCE` (current since 2026-09-13), `0x4E8684EaEA48b524245B2191DeE451eAa1c1cA94` (previous, kept for rollback) | `0x5eBF29b80789e548907C707530C3C7607C4347Df` |
 
-The TapeOut and site contracts on Base and X Layer were deployed by the same deployer in the same order, so their addresses are equal on both chains; the constructor arguments and the fee constants differ. Their processor code hash differs from BNB Smart Chain's because the Layer 2 factory was compiled separately.
+The TapeOut and site contracts on Base and X Layer were deployed by the same deployer in the same order, so their addresses are equal on both chains; the constructor arguments and the fee constants differ, and since 2026-10-22 so do their factory implementations. Their processor code hash differs from BNB Smart Chain's because the Layer 2 factory was compiled separately.
 
 ### DeWEB hub
 
@@ -999,17 +1037,17 @@ Their immutable constructor arguments are the chain's own values from the table 
 
 ### Seal status
 
-As of the reads above: the hub is **not sealed** on any chain (`isSealed()` 0, owner as listed), and the processor factory is **not sealed** on any chain (`isSealed()` 0). The factory implementation, the beacon's owner (the factory) and the beacon's implementation match the seal constants on every chain. The site store and the payment contract are upgradeable proxies. Until every contract this TAP depends on is sealed or no longer upgradeable, TAP-10 cannot become Final (TAP-01 §5.1), and the trust described under Security Considerations applies.
+As of the reads above: the circuit beacon has no owner and points at the circuit implementation on every chain, so the processors are **frozen** (§13.8). The processor factory is **not sealed** on any chain (`isSealed()` 0) and its implementation matches the seal constant; the hub is **not sealed** on any chain (`isSealed()` 0, owner as listed). The site store and the payment contract are upgradeable proxies. Until every contract this TAP depends on is sealed or no longer upgradeable, TAP-10 cannot become Final (TAP-01 §5.1), and the trust described under Security Considerations applies.
 
 ## Security Considerations
 
 ### Both layers
 
-- **Colluding nodes.** Agreement defeats a single lying node, not all configured operators lying together. Clients seeking stronger guarantees **SHOULD** support self-hosted nodes, or verify state proofs against block headers with `eth_getProof`;
+- **Colluding nodes.** Agreement defeats a single lying node, not all configured operators lying together. Stronger guarantees come from the user's own nodes (§5.1) or from verifying state proofs against block headers with `eth_getProof`;
 - **Few operators.** Agreement is only as independent as the configured operators. The reference client's default nodes for X Layer belong to two operators, one of which (OKX) also runs the X Layer sequencer; there, strict agreement requires both, and either one can make reads `unavailable`. Users can add their own nodes;
 - **Freshness without a clock.** The pin-lag check (§5.3) works on devices with a wrong clock, but it cannot notice when every configured operator is behind at the same time; like agreement, it assumes the configured operators are not all wrong together;
-- **Upgradeable contracts.** Until sealed, the owners of the site store, the payment contract, the processor factory and the hub can change what those contracts do. Pinned implementations (§6.1, §13.8) make a lasting change visible and fail-closed, but an upgrade can rewrite storage within one transaction and restore an accepted implementation (§13.8);
-- **Look-alike names and endpoints.** Names are digits only, but `4246.0` and `4264.0`, or two area codes, are easy to confuse. Clients **MUST** always show the complete name, including the area code, and **SHOULD** show the processor name and the holder.
+- **Upgradeable contracts.** Until sealed, the owners of the site store, the payment contract, the processor factory and the hub can change what those contracts do; the processors themselves are frozen on every active chain since 2026-10-22 (§13.8). Pinned implementations (§6.1, §13.8) make a lasting change visible and fail-closed, but an upgrade can rewrite storage within one transaction and restore an accepted implementation (§13.8);
+- **Look-alike names and endpoints.** Names are digits only, but `4246.0` and `4264.0`, or two area codes, are easy to confuse; that is why every client shows the complete name, including the area code (§3.1).
 
 ### Access layer
 
@@ -1018,15 +1056,16 @@ As of the reads above: the hub is **not sealed** on any chain (`isSealed()` 0, o
 - **Site code on the gateway's origin.** Under a Service Worker gateway, site code shares an origin with the gateway's storage. §8.3 and §11 exist because site scripts were shown (audit, 2026-09-20) to plant cached bytes and resolution results that the gateway would otherwise have vouched for;
 - **Listing freeze.** While a circuit is listed on the market its owner cannot change the site, so buyers get what they saw. Reading is unaffected;
 - **The fee can be bypassed** (§6.3); state it plainly.
+- **The server-read tier.** A visitor on a gateway's `-open` host trusts the gateway: it verifies on its server and could serve other bytes, or another site, without the visitor noticing. That is why the tier has its own label, says so on its status page and names the self-verifying label (§8.10).
 
 ### Messaging layer
 
 - **Metadata is public and permanent.** Who wrote to whom, when, how much, and which chains are used are visible to everyone. Only sealed content is protected; lengths are not padded; slot fingerprints reveal which key a message was sealed to;
 - **No forward secrecy.** Whoever later obtains a private key, or the signature it came from, can open every message sealed to it;
-- **The signature is the key.** Anyone holding the §14.2 signature holds the key. Shells that inject a wallet refuse to produce it (§8.4). The official client **MUST NOT** be served from a domain that serves user sites;
-- **Hub owner until sealed.** The owner can replace the implementation and, within one upgrade transaction, rewrite key records or inbox entries and restore an accepted implementation (§13.8). Checking the implementation address alone cannot prove storage was untouched. Seal as early as the protocol allows, after the factory;
-- **Factory until sealed.** Whoever controls the factory can temporarily replace the processor implementation, write as any container and revoke keys without a trace the hub can see. State planted before the factory seal can still move circuits later, as ordinary transfers;
-- **Approved contracts.** A contract approved for a circuit NFT can write as its container within one transaction and revoke its key (§13.4). Clients flag such messages (§18.5). Holders **SHOULD** approve only single tokens and revoke approvals after use;
+- **The signature is the key.** Anyone holding the §14.2 signature holds the key. Shells that inject a wallet refuse to produce it, and the official client is not served from a domain that serves user sites (§8.4);
+- **Hub owner until sealed.** The owner can replace the implementation and, within one upgrade transaction, rewrite key records or inbox entries and restore an accepted implementation (§13.8). Checking the implementation address alone cannot prove storage was untouched. Seal as early as the protocol allows, once the processors are frozen (§13.7);
+- **Processors and factory.** Until the processors were frozen (2026-10-22 on every active chain), whoever controlled the factory could temporarily replace the processor implementation, write as any container and revoke keys without a trace the hub can see; state planted before then can still move circuits later, as ordinary transfers. Since then the factory can no longer fake the holder of an existing circuit, but until it is sealed whoever controls it can change the processor table that names resolve through (§4.2), so that a name points at another circuit, and can deregister a processor (`isCPU`), which stops writes and makes keys unusable for all its circuits (§13.4);
+- **Approved contracts.** A contract approved for a circuit NFT can write as its container within one transaction and revoke its key (§13.4). Clients flag such messages (§18.5). Holders are safer approving only single tokens and revoking approvals after use;
 - **Flooding.** Anyone with an opened container can append to any inbox, and entries are never removed; a message costs its sender only gas. Clients rely on stranger limits and muting (§18.4); a full scan of a flooded inbox costs one `eth_call` per 200 entries;
 - **Layer 2 finality.** On Base and X Layer a single sequencer produces the latest blocks, and they can still be rewritten until they are posted to Ethereum; this is why §17 uses `safe` there. Reads are pinned near the latest block for responsiveness (§5.3), so a message a client shows can still disappear, or move to another inbox index, before it is confirmed;
 - **Strict reads.** Identity, keys, inbox entries, receipts and seal status use strict agreement, so forging them requires every answering node. A single node can only make reads `unavailable` or withhold a payload;
@@ -1097,6 +1136,8 @@ Events: `Bound(bytes32 indexed domainHash, string domain, address indexed contai
 - [ ] Resolution results, blocklists and node settings are out of reach of site code
 - [ ] Blocklist consulted on every resolution; reporting supported
 - [ ] (Service Worker gateways) open-source bootstrap without external resources; script-free, frame-proof gateway pages that echo nothing; `/sw.js` and `/.tape/` reserved; domain on the Public Suffix List
+- [ ] (Recommended) paths under `.private/` are not rendered as pages
+- [ ] (Gateways with a server-read tier) only under `-open` labels; entered only when no Service Worker can be installed; its status page says the gateway verified and names the self-verifying host; `x-tape-mode: server`; same headers and gateway-owned `/sw.js` and `/.tape/`; no Service Worker script from the chain; blocklist applies; no "100% on-chain"
 
 ## Appendix C. History
 
@@ -1113,7 +1154,7 @@ Events: `Bound(bytes32 indexed domainHash, string domain, address indexed contai
 - Finality, the sending wallet, indirect senders and stranger folding are specified;
 - The indexer and notification interfaces (v0.5 §10, §11) are removed.
 
-**Messaging layer, v1.0 (2026-09-18) to this version:**
+**Messaging layer, v1.0 (2026-09-18) to version 1.1 (2026-09-28):**
 
 - **Chains:** Base (8453) and X Layer (196) are active (§2.1), with their hub implementations, constructor arguments and factory seal constants (Deployments). The chain table gains area codes, finality tags and max pin lag;
 - **Names:** on chains other than BNB Smart Chain, names and display forms carry an area code (`#1@2.344`, `1.2.344`, `1.2.344.tape`) instead of the short-name suffix of v1.0 (`#15324@30.base`); a name with an area code resolves only on its own chain (§3.1, §4.1);
@@ -1125,3 +1166,12 @@ Events: `Bound(bytes32 indexed domainHash, string domain, address indexed contai
 - **Security Considerations:** freshness without a clock, Layer 2 finality and few operators;
 - **Document:** type `Standards` as defined in TAP-01 (v1.0: `Standards Track`); RFC 8174 added; references point to TapeKit at a fixed commit;
 - **Unchanged:** the hub contracts, interface, storage and authorization (§13.1, §13.3–§13.7), key derivation (§14.1, §14.2), payload format `0x02` (§15), content and attachments (§16), message IDs (§17), asset attachment verification (§19) and the test vectors (Test Cases).
+
+**Version 1.1 to 1.2 (2026-11-03):**
+
+- **Frozen processors:** the circuit beacons were renounced on 2026-10-22. §13.8 defines frozen processors and builds the factory seal on them; a seen freeze or seal that later reads as lost stays lost. The hub is sealed only after the processors are frozen (§13.4, §13.7). Deployments lists the new factory implementations, the beacon owner and a read of 2026-11-03 (reference implementation `37c617e`);
+- **Server-read gateway tier:** `-open` host labels (§3.3), the `x-tape-mode` header (§8.8) and the requirements of §8.10 (reference implementation `40994bd`);
+- **Private paths:** shells should not render `.private/` paths as pages (§8.9), as discussed for encrypted private files (TAPs issue #13);
+- **Asset attachments:** §19 step 14 states how an earlier indirect entry is compared (question raised for TAP-18, pull request #47);
+- **Document:** requirements that stood under Security Considerations moved to §3.1 and §8.4; Test Cases no longer use key words; the reference implementation and its known gaps are updated;
+- **Unchanged:** names, resolution, agreement, file verification, the hub contracts and interface, keys, payload format `0x02`, content, message IDs and the test vectors.
