@@ -17,6 +17,8 @@ TAPs are the public, numbered documents in which the TapeOut community proposes,
 | [TAP-16](TAPs/TAP-16.md) | Attested Reads from Independent Container Services | Application | Draft |
 | [TAP-17](TAPs/TAP-17.md) | AI Usage Receipts for Container Services | Application | Draft |
 | [TAP-18](TAPs/TAP-18.md) | Container Agent Mandates and Task Messages, Phase 0 | Application | Draft |
+| [TAP-19](TAPs/TAP-19.md) | Private Group Conversations Between Containers | Application | Draft |
+| [TAP-21](TAPs/TAP-21.md) | Proof-Verified Reads | Application | Draft |
 
 Drafts that are proposed but not yet merged are the open pull requests.
 
