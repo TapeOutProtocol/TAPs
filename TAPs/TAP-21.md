@@ -228,7 +228,7 @@ A client that offers proof verification **SHOULD** offer the required policy. A 
 
 Nothing in TAP-10 changes, and a client that does not implement this TAP is unaffected. The three outcomes are client-local.
 
-**History.** The proof mode was first published in the TapeAPI repository as an informative note in "TAP-20" §3.2 and §6.5 (renamed TAPI-20 on 2026-09-30; neither is a TAP number), with vectors in `spec/vectors/tap-20-proof.json`; that file name is historical. This TAP replaces the note with requirements. There are no frozen on-chain constants.
+**History.** The proof mode was first published in the TapeAPI repository as an informative note in TAPI-20 §3.2 and §6.5 (a TapeAPI document whose name began with `TAP-` until 2026-09-30; not a TAP number), with vectors in `spec/vectors/tap-20-proof.json`; that file name is historical. This TAP replaces the note with requirements. There are no frozen on-chain constants.
 
 **Differences from the reference implementation** at the commit below, and the planned changes (its proof mode is experimental and off by default, so they break no stable interface):
 
