@@ -205,16 +205,29 @@ The comparison, with every circuit listed and the raw results, is `assets/tap-02
 
 **Base (8453) and X Layer (196).** TAP-10 lists different contracts on these chains: processor factory `0x1f09DAeFA827f02CBb40967cc91b259763760761`, factory implementation `0x74956236Ab64eD143933040B4137E8A352e4d17b`, circuit beacon `0xf70d1ed4f62CF3780157B0b421b7E2F45bD0991C`, circuit implementation `0x977f217887E085D298Cb3819cDAD5A0ee35F29B2`. This TAP has not compared them with the text, and has not read their source. Until that is done, the Test Cases and the verified-source statements of this TAP apply to BNB Smart Chain only.
 
+**X Layer (196): the circuit beacon's ownership has been renounced.** Read read-only on 2026-11-27 at block 77,027,693 against `https://xlayerrpc.okx.com`:
+
+```sh
+B=0xf70d1ed4f62CF3780157B0b421b7E2F45bD0991C
+cast call    $B "owner()(address)"           # 0x0000000000000000000000000000000000000000
+cast call    $B "implementation()(address)"  # 0x977f217887E085D298Cb3819cDAD5A0ee35F29B2
+cast storage $B 0                            # 0x00..00   slot 0 is the Ownable owner
+```
+
+`upgradeTo` on this beacon is `onlyOwner` and the owner is the zero address, which cannot originate a transaction, so the implementation behind the beacon cannot change again. A deployed processor cannot be pointed at a different beacon either: its 295-byte runtime contains one `DELEGATECALL` and one `CREATE2` and **no `SSTORE`**, with the beacon address a literal in that runtime (the ERC-1967 beacon slot `0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50` records it as well). Checked on two independently created processors, `0xCc42b53B967F341534F285010F4ffF67107B958a` and `0xB04EB79D1A5EECaabAAfF7B77d7c27578EE693FF`; both read `0xf70d1ed4f62CF3780157B0b421b7E2F45bD0991C`.
+
+The processor factory on this chain is **not** sealed: `0x1f09DAeFA827f02CBb40967cc91b259763760761` still returns `owner() == 0xB3D85b42A045c1A88D800CAD0F55d2566a4D3138`. This paragraph therefore says nothing about processors created in future; it says that for every processor already deployed on X Layer, the evaluation semantics of a stored netlist are fixed.
+
 ## Security Considerations
 
 - **Evaluation cost is not bounded by the netlist size.** A REF costs 31 bytes but may expand to a circuit of any size, recursively (§7, requirement 1). Measured on mainnet (2026-09-29, `bsc-dataseed1.defibit.io`, block 124,676,926), `eval` on a 1,204-gate circuit used 2,789,919 execution gas, about 2,317 gas per gate. At that rate a BNB Smart Chain transaction (16,777,216 gas) evaluates about 7,000 gates. The measured `eth_call` caps are 550,000,000 gas on the bsc-dataseed nodes and 50,000,000 on publicnode, about 239,000 and 21,700 gates (*estimated*).
 - **Decoders parse untrusted bytes** (§7, requirement 2).
-- **REF targets are trusted code paths.** The meaning of a circuit that uses REF depends on the referenced circuits. Processor contracts are beacon proxies and the factory is not sealed, so stored netlists and their evaluation could change after tape-out (§7, requirement 3). Public nodes keep recent state only (about 128 blocks on bsc-dataseed, measured), so a verifier reading at a pinned block has to finish within that window or re-pin.
+- **REF targets are trusted code paths.** The meaning of a circuit that uses REF depends on the referenced circuits. Processor contracts are beacon proxies and the factory is not sealed, so stored netlists and their evaluation could change after tape-out (§7, requirement 3) — except on X Layer (196), where the circuit beacon's ownership is renounced and evaluation is therefore already fixed for every deployed processor (see Deployments). Public nodes keep recent state only (about 128 blocks on bsc-dataseed, measured), so a verifier reading at a pinned block has to finish within that window or re-pin.
 - **Equivalence is only as good as the semantics.** Proofs that two circuits are equivalent are only meaningful relative to §4 (§7, requirement 4).
 
 ### Open questions
 
-1. When the processor factory will be sealed, after which stored netlists and their evaluation become immutable.
+1. When the processor factory will be sealed, after which stored netlists and their evaluation become immutable. These are separable, and on **X Layer (196)** the second has already happened without the first: the circuit beacon's ownership is renounced, so evaluation is immutable for every deployed processor while the factory remains owned (see Deployments). Sealing the factory stays open for processors created in future.
 
 Resolved on 2026-09-30 from the verified source: which conditions `tapeout` enforces (§3), whether outputs may be inputs or constants (they may not, §3 condition 3), the types returned by `circuitInfo` (§6), and how padding and wrong-length byte strings are handled (§5).
 
